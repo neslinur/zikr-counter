@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Zikr Counter</title>
+</head>
+<body>
+  <h1>Zikr Counter</h1>
+
+  <!-- Button that starts listening -->
+  <button onclick="startListening()">Start Zikr</button>
+  <button onclick="resetCounts()">Reset</button>
+
+
+  <!-- Paragraph where we’ll show the spoken word -->
+  <p id="output">Waiting for voice...</p>
+
+  <h2>Counts</h2>
+    <ul>
+        <li>SubhanAllah: <span id="subhanallah-count">0</span></li>
+        <li>Alhamdulillah: <span id="alhamdulillah-count">0</span></li>
+        <li>Allahu Akbar: <span id="allahuakbar-count">0</span></li>
+        <li>Astaghfirullah: <span id="astaghfirullah-count">0</span></li>
+    </ul>
+  <!-- This connects your HTML to your separate JavaScript file -->
+  <script src="script.js"></script>
+
+</body>
+</html>
