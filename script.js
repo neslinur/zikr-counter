@@ -1,87 +1,86 @@
-// Get the paragraph where we show what the user said
+// get elements from the page to show counts
 const output = document.getElementById("output");
-
-// Get the spans where we'll show the zikr counts
 const subhanallahCountEl = document.getElementById("subhanallah-count");
 const alhamdulillahCountEl = document.getElementById("alhamdulillah-count");
 const allahuakbarCountEl = document.getElementById("allahuakbar-count");
 const astaghfirullahCountEl = document.getElementById("astaghfirullah-count");
 
-// Create counters to store how many times each zikr has been said
+// set starting counts for each zikr
 let subhanallah = 0;
 let alhamdulillah = 0;
 let allahuakbar = 0;
 let astaghfirullah = 0;
 
-// Set up speech recognition
+// set up voice recognition using browser api
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
-
-// Set the language (you can try 'en-US' or 'ar-SA' or 'tr-TR' later!)
-recognition.lang = 'tr-TR';
+recognition.lang = 'tr-TR'; // use turkish or whatever works best for you
 recognition.continuous = true;
+recognition.interimResults = true;
 
-// Function to start listening when button is clicked
+// start listening when start button is clicked
 function startListening() {
   recognition.start();
 }
 
-// This function runs every time the browser hears speech
+// this counts how many times a word appears in a sentence (latin letters)
+function countOccurrences(sentence, word) {
+  const regex = new RegExp(`\\b${word}\\b`, 'gi');
+  const matches = sentence.match(regex);
+  return matches ? matches.length : 0;
+}
+
+// this counts exact arabic words (no word boundary because arabic doesn't split the same)
+function countArabicExact(sentence, arabicWord) {
+  return sentence.split(arabicWord).length - 1;
+}
+
+// this runs when the browser hears something
 recognition.onresult = function(event) {
-  // Get the most recent thing the user said
-  const transcript = event.results[event.results.length - 1][0].transcript.trim();
+    let transcript = "";
 
-  // Show what was heard
-  output.textContent = "Heard: " + transcript;
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+        transcript += event.results[i][0].transcript;
 
-  // Convert everything to lowercase to make comparison easier
-  const said = transcript.toLowerCase();
-
-  // Check what was said and update the correct counter
-  if (said.includes("subhanallah")
-      || said.includes("sübhanallah") || // Common pronunciation
-      said.includes("سبحان الله") ) {    // Arabic script
-        subhanallah++;
-        subhanallahCountEl.textContent = subhanallah;
-  } else if (said.includes("alhamdulillah")
-             || said.includes("elhamdülillah") || // Turkish pronunciation
-             said.includes("الحمد لله") ) {    // Arabic script
-        alhamdulillah++;
-        alhamdulillahCountEl.textContent = alhamdulillah;
-  } else if (said.includes("allahu akbar") || // Common pronunciation
-             said.includes("allahu ekber") || // Turkish pronunciation
-             said.includes("الله أكبر") ) {   // Arabic script{
-        allahuakbar++;
-        allahuakbarCountEl.textContent = allahuakbar;
-  }
-// Check all known versions that might be returned depending on language or pronunciation
-    else if (
-        said.includes("astaghfirullah") ||
-        said.includes("estağfurullah") || // Turkish
-        said.includes("أستغفر الله")     // Arabic script
-    ) {
-        astaghfirullah++;
-        astaghfirullahCountEl.textContent = astaghfirullah;
+        if (event.results[i].isFinal) {
+        processZikr(event.results[i][0].transcript.trim());
+        }
     }
+  output.textContent = "heard: " + transcript;
+ 
+}
 
-};
+function processZikr(transcript) {
+    const said = transcript.toLowerCase();
 
-// This function resets all counts to 0 and updates the page
+  // count how many times each zikr is said
+    subhanallah += countOccurrences(said, "subhanallah") + countOccurrences(said, "sübhanallah");
+    alhamdulillah += countOccurrences(said, "alhamdulillah") + countOccurrences(said, "elhamdülillah");
+    allahuakbar += countOccurrences(said, "allahu akbar") + countOccurrences(said, "allahu ekber");
+    astaghfirullah +=
+    countOccurrences(said, "astaghfirullah") +
+    countOccurrences(said, "estağfurullah") +
+    countArabicExact(said, "أستغفر الله");
+
+
+  // update numbers on the page
+  subhanallahCountEl.textContent = subhanallah;
+  alhamdulillahCountEl.textContent = alhamdulillah;
+  allahuakbarCountEl.textContent = allahuakbar;
+  astaghfirullahCountEl.textContent = astaghfirullah;
+}
+
+// this resets all counts to 0 when reset button is clicked
 function resetCounts() {
-  // Reset the variables
   subhanallah = 0;
   alhamdulillah = 0;
   allahuakbar = 0;
   astaghfirullah = 0;
 
-  // Reset what’s shown on screen
   subhanallahCountEl.textContent = 0;
   alhamdulillahCountEl.textContent = 0;
   allahuakbarCountEl.textContent = 0;
   astaghfirullahCountEl.textContent = 0;
 
-  // Optional: Clear the "Heard: ..." text
-  output.textContent = "Waiting for voice...";
+  output.textContent = "waiting for voice...";
 }
-
-
