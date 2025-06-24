@@ -11,6 +11,12 @@ let alhamdulillah = 0;
 let allahuakbar = 0;
 let astaghfirullah = 0;
 
+// flags to prevent multiple celebrations for the same zikr
+let lastCelebratedSubhanallah = 0;
+let lastCelebratedAlhamdulillah = 0;
+let lastCelebratedAllahuakbar = 0;
+let lastCelebratedAstaghfirullah = 0;
+
 // set up voice recognition using browser api
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
@@ -34,6 +40,30 @@ function countOccurrences(sentence, word) {
 function countArabicExact(sentence, arabicWord) {
   return sentence.split(arabicWord).length - 1;
 }
+
+function checkForCelebration() {
+  if (subhanallah >= lastCelebratedSubhanallah + 33) {
+    alert(`🎉 SubhanAllah reached ${lastCelebratedSubhanallah + 33}!`);
+    lastCelebratedSubhanallah += 33;
+  }
+
+  if (alhamdulillah >= lastCelebratedAlhamdulillah + 33) {
+    alert(`🎉 Alhamdulillah reached ${lastCelebratedAlhamdulillah + 33}!`);
+    lastCelebratedAlhamdulillah += 33;
+  }
+
+  if (allahuakbar >= lastCelebratedAllahuakbar + 33) {
+    alert(`🎉 Allahu Akbar reached ${lastCelebratedAllahuakbar + 33}!`);
+    lastCelebratedAllahuakbar += 33;
+  }
+
+  if (astaghfirullah >= lastCelebratedAstaghfirullah + 33) {
+    alert(`🎉 Astaghfirullah reached ${lastCelebratedAstaghfirullah + 33}!`);
+    lastCelebratedAstaghfirullah += 33;
+  }
+}
+
+
 
 // this runs when the browser hears something
 recognition.onresult = function(event) {
@@ -68,6 +98,9 @@ function processZikr(transcript) {
   alhamdulillahCountEl.textContent = alhamdulillah;
   allahuakbarCountEl.textContent = allahuakbar;
   astaghfirullahCountEl.textContent = astaghfirullah;
+
+  // celebrate if a zikr reaches 33 counts
+  checkForCelebration();
 }
 
 // this resets all counts to 0 when reset button is clicked
@@ -81,6 +114,11 @@ function resetCounts() {
   alhamdulillahCountEl.textContent = 0;
   allahuakbarCountEl.textContent = 0;
   astaghfirullahCountEl.textContent = 0;
+
+  lastCelebratedSubhanallah = 0;
+  lastCelebratedAlhamdulillah = 0;
+  lastCelebratedAllahuakbar = 0;
+  lastCelebratedAstaghfirullah = 0;
 
   output.textContent = "waiting for voice...";
 }
